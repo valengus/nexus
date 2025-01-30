@@ -28,4 +28,5 @@ jobs:
 
     - name: Molecule
       run: |
+        source .venv/bin/activate
         molecule test --all
