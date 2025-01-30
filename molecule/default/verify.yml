@@ -4,6 +4,10 @@
   gather_facts: false
   tasks:
   
-  - name: Example assertion
-    ansible.builtin.assert:
-      that: true
+  - name: Verify | Check Nexus api 
+    ansible.builtin.uri:
+      url: "{{ nexus_api_url }}/v1/status"
+      user: admin
+      password: "{{ nexus_admin_password }}"
+      method: GET
+      force_basic_auth: true
