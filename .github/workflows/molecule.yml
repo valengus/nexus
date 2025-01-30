@@ -21,6 +21,7 @@ jobs:
         
     - name: Info
       run: |
+        source .venv/bin/activate
         ansible --version
         molecule --version
         pip freeze
