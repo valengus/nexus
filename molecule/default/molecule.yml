@@ -1,7 +1,4 @@
 ---
-dependency:
-  name: galaxy
-
 driver:
   name: docker
 
@@ -34,10 +31,6 @@ provisioner:
 
 verifier:
   name: ansible
-
-lint: |
-  yamllint .
-  ansible-lint
 
 scenario:
   name: default
