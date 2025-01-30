@@ -1,0 +1,57 @@
+---
+- name: Nexus | Check docker repo group {{item.name}}
+  ansible.builtin.uri:
+    url: "{{ nexus_api_url }}/v1/repositories/docker/group/{{ item.name }}"
+    user: admin
+    password: "{{ nexus_admin_password }}"
+    method: GET
+    force_basic_auth: true
+    status_code: 200,404
+  register: _result
+
+- name: Nexus | Create docker repo group {{ item.name }}
+  ansible.builtin.uri:
+    url: "{{ nexus_api_url }}/v1/repositories/docker/group"
+    user: admin
+    password: "{{ nexus_admin_password }}"
+    method: POST
+    force_basic_auth: true
+    body_format: json
+    body:
+      name: "{{ item.name }}"
+      online: true
+      storage:
+        blobStoreName: "{{ item.blob_store | default('default') }}"
+        strictContentTypeValidation: true
+      group:
+        memberNames: "{{ item.members }}"
+      docker:
+        httpPort: "{{ item.http_port }}"
+        v1Enabled: false
+        forceBasicAuth: false
+    status_code: 201
+  when: _result.status == 404
+  changed_when: true
+
+- name: Nexus | Update docker repo group {{ item.name }}, if exists
+  ansible.builtin.uri:
+    url: "{{ nexus_api_url }}/v1/repositories/docker/group/{{ item.name }}"
+    user: admin
+    password: "{{ nexus_admin_password }}"
+    method: PUT
+    force_basic_auth: true
+    body_format: json
+    body:
+      name: "{{ item.name }}"
+      online: true
+      storage:
+        blobStoreName: "{{ item.blob_store | default('default') }}"
+        strictContentTypeValidation: true
+      group:
+        memberNames: "{{ item.members }}"
+      docker:
+        httpPort: "{{ item.http_port }}"
+        v1Enabled: false
+        forceBasicAuth: false
+    status_code: 204
+  when: _result.status == 200

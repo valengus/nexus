@@ -1,0 +1,26 @@
+nexus_java_pkg: java-17-openjdk
+nexus_version: 3.76.1-01
+nexus_major_version: "{{ nexus_version.split('.')[0] }}"
+nexus_admin_password: "password"
+nexus_bind_port: 8081
+nexus_api_url: "http://localhost:{{nexus_bind_port}}/service/rest"
+
+nexus_yum_proxy_repos:
+- name: "oraclelinux"
+  url: "http://yum.oracle.com/repo/OracleLinux" 
+- name: "docker-ce-rhel"
+  url: "https://download.docker.com/linux/rhel"
+- name: "hashicorp-rhel"
+  url: "https://rpm.releases.hashicorp.com/RHEL"
+
+nexus_docker_proxy_repos:
+- name: "dockerhub"
+  url: "https://registry-1.docker.io" 
+  index_type: "HUB"
+- name: "k8s"
+  url: "https://registry.k8s.io" 
+
+nexus_docker_groups:
+- name: "docker-proxy-all"
+  members: "{{ nexus_docker_proxy_repos | map(attribute='name') | list | unique }}" # ['dockerhub', 'k8s']
+  http_port: 8080

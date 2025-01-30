@@ -1,0 +1,15 @@
+---
+- name: Nexus | Install java
+  ansible.builtin.yum:
+    name: "{{ nexus_java_pkg }}"
+
+- name: Nexus | Install tar & gzip
+  ansible.builtin.dnf:
+    name: ["tar", "gzip"]
+
+- name: Nexus | sysctl for bind port
+  ansible.posix.sysctl:
+    name: net.ipv4.ip_unprivileged_port_start
+    value: "{{ nexus_bind_port }}"
+    state: present
+  when: (nexus_bind_port | int) < 1024

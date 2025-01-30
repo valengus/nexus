@@ -1,0 +1,88 @@
+---
+- name: Nexus | Create nexus group
+  ansible.builtin.group:
+    name: nexus
+    state: present
+
+- name: Nexus | Create nexus user
+  ansible.builtin.user:
+    name: nexus
+    state: present
+    append: yes
+    group: nexus
+
+- name: Nexus | Create /opt/nexus-{{ nexus_version }} directory
+  ansible.builtin.file:
+    path: /opt/nexus-{{ nexus_version }}
+    state: directory
+    mode: "0755"
+
+- name: Nexus | Download and unarchive nexus to /opt/nexus-{{ nexus_version }}
+  ansible.builtin.unarchive:
+    src: "https://download.sonatype.com/nexus/{{ nexus_major_version }}/nexus-{{ nexus_version }}-unix.tar.gz"
+    dest: /opt/nexus-{{ nexus_version }}
+    creates: /opt/nexus-{{ nexus_version }}/sonatype-work
+    remote_src: yes
+    owner: nexus
+    group: nexus
+
+- name: Nexus | /opt/nexus-{{ nexus_version }} permitions
+  ansible.builtin.file:
+    path: /opt/nexus-{{ nexus_version }}
+    state: directory
+    recurse: true 
+    owner: nexus
+    group: nexus
+
+- name: Nexus | Create links
+  ansible.builtin.file:
+    src: "{{ item.src }}"
+    dest: "{{ item.dest }}"
+    owner: nexus
+    group: nexus
+    state: link
+  with_items:
+  - { src: "/opt/nexus-{{ nexus_version }}/sonatype-work", dest: "/opt/sonatype-work" }
+  - { src: "/opt/nexus-{{ nexus_version }}/nexus-{{ nexus_version }}", dest: "/opt/nexus" }
+  notify: 
+    - Nexus restart
+
+- name: Create context for nexus binary on selinux systems
+  community.general.sefcontext:
+    target: "/opt/nexus-{{ nexus_version }}/nexus-{{ nexus_version }}/bin/nexus"
+    setype: bin_t
+    state: present
+  notify: 
+  - Relabel nexus binary according to new context
+  tags: ["notest"]
+
+- name: Nexus | Add run_as_user="nexus" to nexus.rc
+  community.general.ini_file:
+    path: /opt/nexus/bin/nexus.rc
+    option: run_as_user
+    value: '"nexus"'
+    state: present
+    no_extra_spaces: true
+  notify: 
+    - Nexus restart
+
+- name: Nexus | Template a file to /etc/sysconfig/nexus
+  ansible.builtin.template:
+    src: nexus.env
+    dest: /etc/sysconfig/nexus
+    owner: root
+    group: root
+    mode: '0640'
+  notify: 
+    - Nexus restart
+
+- name: Nexus | Template a file to /usr/lib/systemd/system/nexus.service
+  ansible.builtin.template:
+    src: nexus.service
+    dest: /usr/lib/systemd/system/nexus.service
+    owner: root
+    group: root
+    mode: '0640'
+  notify: 
+    - Systemd daemon reload
+    - Nexus restart

@@ -1,0 +1,50 @@
+---
+dependency:
+  name: galaxy
+
+driver:
+  name: docker
+
+platforms:
+- name: nexus.molecule
+  image: docker.io/library/oraclelinux:9
+  pre_build_image: true
+  privileged: true
+  cgroupns_mode: host
+  tmpfs:
+  - /tmp
+  - /run
+  capabilities:
+  - SYS_ADMIN
+  command: "/usr/lib/systemd/systemd"
+  groups:
+  - nexus
+  networks:
+  - name: molecule
+  volumes:
+  - /sys/fs/cgroup:/sys/fs/cgroup:rw
+
+provisioner:
+  name: ansible
+  log: true
+  inventory:
+    group_vars:
+      nexus:
+        nexus_version: 3.76.1-01
+
+verifier:
+  name: ansible
+
+lint: |
+  yamllint .
+  ansible-lint
+
+scenario:
+  name: default
+  test_sequence:
+    - destroy
+    - create
+    - converge
+    - idempotence
+    - verify
+    - destroy

@@ -1,0 +1,4 @@
+ansible-core==2.15.13
+ansible==8.7.0
+molecule==6.0.2
+molecule-docker==2.1.0

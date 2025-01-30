@@ -1,0 +1,18 @@
+name: test
+on: workflow_dispatch
+jobs:
+  molecule:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v3
+
+    - name: Prepare
+      run: |
+        rm -rf .venv
+        python3 -m venv .venv
+        source .venv/bin/activate
+        pip install pip --upgrade
+        pip install -r requirements.txt
+        ansible --version

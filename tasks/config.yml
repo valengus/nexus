@@ -1,0 +1,42 @@
+---
+- name: Check if nexus.properties exists
+  stat:
+    path: /opt/sonatype-work/nexus3/etc/nexus.properties
+  register: stat_result
+
+- name: Nexus | Nexus application-port
+  community.general.ini_file:
+    path: /opt/sonatype-work/nexus3/etc/nexus.properties
+    option: application-port
+    value: "{{ nexus_bind_port }}"
+    state: present
+    no_extra_spaces: true
+    owner: nexus
+    group: nexus
+  when: stat_result.stat.exists
+  notify: 
+    - Nexus restart
+
+- name: Nexus | Skip creating default repositories
+  community.general.ini_file:
+    path: /opt/nexus/etc/nexus-default.properties
+    option: nexus.skipDefaultRepositories
+    value: "true"
+    state: present
+    no_extra_spaces: true
+    owner: nexus
+    group: nexus
+  notify: 
+    - Nexus restart
+
+- name: Nexus | Nexus application-port (default.properties)
+  community.general.ini_file:
+    path: /opt/nexus/etc/nexus-default.properties
+    option: application-port
+    value: "{{ nexus_bind_port }}"
+    state: present
+    no_extra_spaces: true
+    owner: nexus
+    group: nexus
+  notify: 
+    - Nexus restart

@@ -1,0 +1,66 @@
+---
+- name: Nexus | Install Dependencies
+  ansible.builtin.include_tasks: pre.yml
+
+- name: Nexus | Install Nexus
+  ansible.builtin.include_tasks: install.yml
+
+- name: Nexus | Config Nexus
+  ansible.builtin.include_tasks: config.yml
+
+- name: Nexus | Flush handlers
+  ansible.builtin.meta: flush_handlers
+
+- name: Nexus | Ensure service is enabled & started
+  ansible.builtin.service:
+    name: nexus
+    state: started
+    enabled: true
+
+- name: Nexus | Check Nexus status
+  ansible.builtin.uri:
+    url: "{{ nexus_api_url }}/v1/status"
+    user: admin
+    password: "{{ nexus_admin_password }}"
+    method: GET
+    force_basic_auth: true
+  register: _result
+  until: _result.status == 200
+  retries: 60
+  delay: 5
+
+- name: Nexus | Config Nexus properties
+  ansible.builtin.include_tasks: properties.yml
+
+- name: Nexus | Config YUM proxy repo
+  ansible.builtin.include_tasks: repos/yum_proxy.yml
+  with_items: "{{ nexus_yum_proxy_repos }}"
+
+- name: Nexus | Get active realms
+  ansible.builtin.uri:
+    url: "{{ nexus_api_url }}/v1/security/realms/active"
+    user: admin
+    password: "{{ nexus_admin_password }}"
+    method: GET
+    force_basic_auth: true
+  register: active_realms
+
+- name: Nexus | PUT DockerToken realm in active realm list
+  ansible.builtin.uri:
+    url: "{{ nexus_api_url }}/v1/security/realms/active"
+    user: admin
+    password: "{{ nexus_admin_password }}"
+    method: PUT
+    force_basic_auth: true
+    body_format: json
+    body: "{{ active_realms.json + ['DockerToken'] }}"
+    status_code: 204
+  when: active_realms.json is not contains('DockerToken')
+
+- name: Nexus | Config docker proxy repos
+  ansible.builtin.include_tasks: repos/docker_proxy.yml
+  with_items: "{{ nexus_docker_proxy_repos }}"
+
+- name: Nexus | Config docker groups
+  ansible.builtin.include_tasks: repos/docker_group.yml
+  with_items: "{{ nexus_docker_groups }}"

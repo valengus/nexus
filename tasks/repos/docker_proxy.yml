@@ -1,0 +1,83 @@
+---
+- name: Nexus | Check docker proxy repo {{ item.name }}
+  ansible.builtin.uri:
+    url: "{{ nexus_api_url }}/v1/repositories/docker/proxy/{{ item.name }}"
+    user: admin
+    password: "{{ nexus_admin_password }}"
+    method: GET
+    force_basic_auth: true
+    status_code: 200,404
+  register: _result
+
+- name: Nexus | Create docker proxy repo {{ item.name }}
+  ansible.builtin.uri:
+    url: "{{ nexus_api_url }}/v1/repositories/docker/proxy"
+    user: admin
+    password: "{{ nexus_admin_password }}"
+    method: POST
+    force_basic_auth: true
+    body_format: json
+    body:
+      name: "{{ item.name }}"
+      online: true
+      storage:
+        blobStoreName: "{{ item.blob_store | default('default') }}"
+        strictContentTypeValidation: true
+      proxy:
+        remoteUrl: "{{ item.url }}"
+        contentMaxAge: 1440
+        metadataMaxAge: 1440
+      negativeCache:
+        enabled: true
+        timeToLive: 1440
+      httpClient:
+        blocked: false
+        autoBlock: true
+        connection:
+          enableCircularRedirects: false
+          enableCookies: false
+          useTrustStore: false
+      docker:
+        v1Enabled: false
+        forceBasicAuth: false
+      dockerProxy:
+        indexType: "{{ item.index_type | default('REGISTRY') }}"
+    status_code: 201
+  when: _result.status == 404
+  changed_when: true
+
+- name: Nexus | Update docker proxy repo {{ item.name }}, if exists
+  ansible.builtin.uri:
+    url: "{{ nexus_api_url }}/v1/repositories/docker/proxy/{{ item.name }}"
+    user: admin
+    password: "{{ nexus_admin_password }}"
+    method: PUT
+    force_basic_auth: true
+    body_format: json
+    body:
+      name: "{{ item.name }}"
+      online: true
+      storage:
+        blobStoreName: "{{ item.blob_store | default('default') }}"
+        strictContentTypeValidation: true
+      proxy:
+        remoteUrl: "{{ item.url }}"
+        contentMaxAge: 1440
+        metadataMaxAge: 1440
+      negativeCache:
+        enabled: true
+        timeToLive: 1440
+      httpClient:
+        blocked: false
+        autoBlock: true
+        connection:
+          enableCircularRedirects: false
+          enableCookies: false
+          useTrustStore: false
+      docker:
+        v1Enabled: false
+        forceBasicAuth: false
+      dockerProxy:
+        indexType: "{{ item.index_type | default('REGISTRY') }}"
+    status_code: 204
+  when: _result.status == 200

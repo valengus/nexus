@@ -1,0 +1,12 @@
+---
+- name: Relabel nexus binary according to new context
+  ansible.builtin.command: restorecon -irv /opt/nexus-{{ nexus_version }}/nexus-{{ nexus_version }}/bin/nexus
+
+- name: Systemd daemon reload
+  ansible.builtin.systemd:
+    daemon_reload: true
+
+- name: Nexus restart
+  service:
+    name: nexus
+    state: restarted
