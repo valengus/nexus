@@ -8,21 +8,25 @@
 - name: Nexus | Config Nexus
   ansible.builtin.include_tasks: config.yml
 
-- name: Nexus | Config YUM proxy repo
-  ansible.builtin.include_tasks: repos/yum_proxy.yml
-  with_items: "{{ nexus_yum_proxy_repos }}"
-
 - name: Nexus | Config realms
   ansible.builtin.include_tasks: realms.yml
 
-- name: Nexus | Config docker proxy repos
-  ansible.builtin.include_tasks: repos/docker_proxy.yml
-  with_items: "{{ nexus_docker_proxy_repos }}"
+- name: Nexus | Config docker proxy repositories
+  ansible.builtin.include_tasks: repositories/docker_proxy.yml
+  with_items: "{{ nexus_docker_proxy_repositories }}"
 
 - name: Nexus | Config docker groups
-  ansible.builtin.include_tasks: repos/docker_group.yml
+  ansible.builtin.include_tasks: repositories/docker_group.yml
   with_items: "{{ nexus_docker_groups }}"
 
-- name: Nexus | Config pypi proxy repos
-  ansible.builtin.include_tasks: repos/pypi_proxy.yml
-  with_items: "{{ nexus_pypi_proxys }}"
+- name: Nexus | Config YUM proxy repositories
+  ansible.builtin.include_tasks: repositories/yum_proxy.yml
+  with_items: "{{ nexus_yum_proxy_repositories }}"
+
+- name: Nexus | Config pypi proxy repositories
+  ansible.builtin.include_tasks: repositories/pypi_proxy.yml
+  with_items: "{{ nexus_pypi_proxy_repositories }}"
+
+- name: Nexus | Config proxy repositories
+  ansible.builtin.include_tasks: repositories/raw_proxy.yml
+  with_items: "{{ nexus_raw_proxy_repositories }}"

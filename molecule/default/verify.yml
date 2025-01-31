@@ -63,3 +63,10 @@
     ansible.builtin.command: ansible --version
     environment: 
       PATH: "{{ ansible_env.PATH }}:/usr/local/bin"
+
+  - name: Download file from raw proxy repo
+    ansible.builtin.get_url:
+      url: http://localhost:8081/repository/flatcar-stable-proxy/amd64-usr/current/flatcar_production_qemu_image.img.bz2
+      dest: /tmp/flatcar_production_qemu_image.img.bz2
+      checksum: md5:http://localhost:8081/repository/flatcar-stable-proxy/amd64-usr/current/flatcar_production_qemu_image.img.bz2.DIGESTS
+      timeout: 120

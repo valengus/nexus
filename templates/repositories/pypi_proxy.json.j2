@@ -1,0 +1,29 @@
+{
+  "name": "{{ item.name }}",
+  "online": true,
+  "storage": {
+    "blobStoreName": "{{ item.blob_store | default('default') }}",
+    "strictContentTypeValidation": true
+  },
+  "proxy": {
+    "remoteUrl": "{{ item.url }}",
+    "contentMaxAge": 1440,
+    "metadataMaxAge": 1440
+  },
+  "negativeCache": {
+    "enabled": true,
+    "timeToLive": 1440
+  },
+  "httpClient": {
+    "blocked": false,
+    "autoBlock": true,
+    "connection": {
+      "enableCircularRedirects": false,
+      "enableCookies": false,
+      "useTrustStore": false
+    }
+  },
+  "pypi": {
+    "removeQuarantined": false
+  }
+}

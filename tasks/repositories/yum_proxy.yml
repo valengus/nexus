@@ -17,22 +17,7 @@
     method: POST
     force_basic_auth: true
     body_format: json
-    body:
-      name: "{{item.name}}"
-      online: true
-      storage:
-        blobStoreName: "{{ item.blob_store | default('default') }}"
-        strictContentTypeValidation: true
-      proxy:
-        remoteUrl: "{{ item.url }}"
-        contentMaxAge: 1440
-        metadataMaxAge: 1440
-      negativeCache:
-        enabled: true
-        timeToLive: 1440
-      httpClient:
-        blocked: false
-        autoBlock: true
+    body: "{{ lookup('ansible.builtin.template', 'repositories/yum_proxy.json.j2') }}"
     status_code: 201
   when: _result.status == 404
   changed_when: true
@@ -45,21 +30,6 @@
     method: PUT
     force_basic_auth: true
     body_format: json
-    body:
-      name: "{{item.name}}"
-      online: true
-      storage:
-        blobStoreName: "{{ item.blob_store | default('default') }}"
-        strictContentTypeValidation: true
-      proxy:
-        remoteUrl: "{{ item.url }}"
-        contentMaxAge: 1440
-        metadataMaxAge: 1440
-      negativeCache:
-        enabled: true
-        timeToLive: 1440
-      httpClient:
-        blocked: false
-        autoBlock: true
+    body: "{{ lookup('ansible.builtin.template', 'repositories/yum_proxy.json.j2') }}"
     status_code: 204
   when: _result.status == 200

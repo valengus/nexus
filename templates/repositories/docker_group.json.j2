@@ -1,0 +1,16 @@
+{
+  "name": "{{ item.name }}",
+  "online": true,
+  "storage": {
+    "blobStoreName": "{{ item.blob_store | default('default') }}",
+    "strictContentTypeValidation": true
+  },
+  "group": {
+    "memberNames": {{ item.members | to_json }}
+  },
+  "docker": {
+    "httpPort": "{{ item.http_port }}",
+    "v1Enabled": false,
+    "forceBasicAuth": false
+  }
+}

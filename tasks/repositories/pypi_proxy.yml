@@ -1,0 +1,35 @@
+---
+- name: Nexus | Check pypi proxy repo {{ item.name }}
+  ansible.builtin.uri:
+    url: "{{ nexus_api_url }}/v1/repositories/pypi/proxy/{{ item.name }}"
+    user: admin
+    password: "{{ nexus_admin_password }}"
+    method: GET
+    force_basic_auth: true
+    status_code: 200,404
+  register: _result
+
+- name: Nexus | Create pypi proxy repo {{ item.name }}
+  ansible.builtin.uri:
+    url: "{{ nexus_api_url }}/v1/repositories/pypi/proxy"
+    user: admin
+    password: "{{ nexus_admin_password }}"
+    method: POST
+    force_basic_auth: true
+    body_format: json
+    body: "{{ lookup('ansible.builtin.template', 'repositories/pypi_proxy.json.j2') }}"
+    status_code: 201
+  when: _result.status == 404
+  changed_when: true
+
+- name: Nexus | Update pypi proxy repo {{item.name}}, if exists
+  ansible.builtin.uri:
+    url: "{{ nexus_api_url }}/v1/repositories/pypi/proxy/{{ item.name }}"
+    user: admin
+    password: "{{ nexus_admin_password }}"
+    method: PUT
+    force_basic_auth: true
+    body_format: json
+    body: "{{ lookup('ansible.builtin.template', 'repositories/pypi_proxy.json.j2') }}"
+    status_code: 204
+  when: _result.status == 200

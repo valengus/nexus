@@ -38,26 +38,24 @@ provisioner:
         - { option: nexus.skipDefaultRepositories, value: "true" }
         nexus_properties:
         - { option: application-port, value: "{{ nexus_bind_port }}" }
-        nexus_yum_proxy_repos:
-        - name: oraclelinux-proxy
-          url: http://yum.oracle.com/repo/OracleLinux
-        - name: docker-ce-rhel-proxy
-          url: https://download.docker.com/linux/rhel
+        - { option: application-host, value: "0.0.0.0" }
+        nexus_yum_proxy_repositories:
         - name: hashicorp-rhel-proxy
           url: https://rpm.releases.hashicorp.com/RHEL
-        nexus_docker_proxy_repos:
+        nexus_docker_proxy_repositories:
         - name: dockerhub-proxy
           url: https://registry-1.docker.io 
           index_type: "HUB"
-        - name: k8s-proxy
-          url: https://registry.k8s.io
         nexus_docker_groups:
         - name: docker-proxy-all
-          members: "{{ nexus_docker_proxy_repos | map(attribute='name') | list | unique }}" # ['dockerhub-proxy', 'k8s-proxy']
+          members: "{{ nexus_docker_proxy_repositories | map(attribute='name') | list | unique }}"
           http_port: 5000
-        nexus_pypi_proxys:
+        nexus_pypi_proxy_repositories:
         - name: pypi-proxy
           url: https://pypi.org
+        nexus_raw_proxy_repositories:
+        - name: flatcar-stable-proxy
+          url: https://stable.release.flatcar-linux.net
 
 verifier:
   name: ansible

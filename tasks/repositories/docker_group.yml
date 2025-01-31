@@ -17,18 +17,7 @@
     method: POST
     force_basic_auth: true
     body_format: json
-    body:
-      name: "{{ item.name }}"
-      online: true
-      storage:
-        blobStoreName: "{{ item.blob_store | default('default') }}"
-        strictContentTypeValidation: true
-      group:
-        memberNames: "{{ item.members }}"
-      docker:
-        httpPort: "{{ item.http_port }}"
-        v1Enabled: false
-        forceBasicAuth: false
+    body: "{{ lookup('ansible.builtin.template', 'repositories/docker_group.json.j2') }}"
     status_code: 201
   when: _result.status == 404
   changed_when: true
@@ -41,17 +30,7 @@
     method: PUT
     force_basic_auth: true
     body_format: json
-    body:
-      name: "{{ item.name }}"
-      online: true
-      storage:
-        blobStoreName: "{{ item.blob_store | default('default') }}"
-        strictContentTypeValidation: true
-      group:
-        memberNames: "{{ item.members }}"
-      docker:
-        httpPort: "{{ item.http_port }}"
-        v1Enabled: false
-        forceBasicAuth: false
+    body: "{{ lookup('ansible.builtin.template', 'repositories/docker_group.json.j2') }}"
     status_code: 204
   when: _result.status == 200
+
