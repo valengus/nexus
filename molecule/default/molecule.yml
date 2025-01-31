@@ -34,16 +34,25 @@ provisioner:
         nexus_bind_port: 8081
         nexus_api_url: "http://localhost:{{nexus_bind_port}}/service/rest"
         nexus_yum_proxy_repos:
-        - name: "hashicorp-rhel"
-          url: "https://rpm.releases.hashicorp.com/RHEL"
+        - name: oraclelinux-proxy
+          url: http://yum.oracle.com/repo/OracleLinux
+        - name: docker-ce-rhel-proxy
+          url: https://download.docker.com/linux/rhel
+        - name: hashicorp-rhel-proxy
+          url: https://rpm.releases.hashicorp.com/RHEL
         nexus_docker_proxy_repos:
-        - name: "dockerhub"
-          url: "https://registry-1.docker.io" 
+        - name: dockerhub-proxy
+          url: https://registry-1.docker.io 
           index_type: "HUB"
+        - name: k8s-proxy
+          url: https://registry.k8s.io
         nexus_docker_groups:
-        - name: "docker-proxy-all"
-          members: "{{ nexus_docker_proxy_repos | map(attribute='name') | list | unique }}"
+        - name: docker-proxy-all
+          members: "{{ nexus_docker_proxy_repos | map(attribute='name') | list | unique }}" # ['dockerhub-proxy', 'k8s-proxy']
           http_port: 5000
+        nexus_pypi_proxys:
+        - name: pypi-proxy
+          url: https://pypi.org
 
 verifier:
   name: ansible

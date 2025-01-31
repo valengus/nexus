@@ -20,3 +20,46 @@
   - name: Verify | Check docker registry (download images)
     ansible.builtin.shell: skopeo copy --src-tls-verify=false docker://localhost:5000/{{item}} docker-archive:/tmp/{{item}}.tar
     with_items: ["ubuntu", "debian", "alpine"]
+
+  - name: Import hashicorp repo gpg key
+    ansible.builtin.rpm_key:
+      state: present
+      key: https://rpm.releases.hashicorp.com/gpg
+
+  - name: Add hashicorp repo
+    ansible.builtin.yum_repository:
+      name: hashicorp
+      description: Hashicorp Stable - $basearch
+      file: hashicorp
+      baseurl: http://localhost:8081/repository/hashicorp-rhel-proxy/$releasever/$basearch/stable
+      gpgcakey: https://rpm.releases.hashicorp.com/gpg
+      gpgcheck: yes
+
+  - name: Verify | Install consul from hashicorp repo
+    ansible.builtin.yum:
+      name: consul
+      enablerepo: 'hashicorp'
+      disablerepo: '*'
+
+  - name: Verify | Check hashicorp package
+    ansible.builtin.shell: yum info consul | grep 'From repo' | grep hashicorp
+
+  - name: Verify | Install python3-pip
+    ansible.builtin.yum:
+      name: python3-pip
+
+  - name: Verify | Update pip3
+    ansible.builtin.pip:
+      name: pip
+      extra_args: " -i http://localhost:8081/repository/pypi-proxy/simple --upgrade"
+
+  - name: Verify | Install ansible over pip
+    ansible.builtin.pip:
+      name: ["ansible-core==2.15", "ansible"]
+      extra_args: " -i http://localhost:8081/repository/pypi-proxy/simple"
+      umask: "0022"
+
+  - name: Check ansible
+    ansible.builtin.command: ansible --version
+    environment: 
+      PATH: "{{ ansible_env.PATH }}:/usr/local/bin"
