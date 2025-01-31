@@ -2,9 +2,9 @@
 - name: Verify
   hosts: all
   gather_facts: false
-  
+
   tasks:
-  
+
   - name: Verify | Install skopeo
     ansible.builtin.yum:
       name: skopeo
@@ -21,12 +21,12 @@
     ansible.builtin.shell: skopeo copy --src-tls-verify=false docker://localhost:5000/{{item}} docker-archive:/tmp/{{item}}.tar
     with_items: ["ubuntu", "debian", "alpine"]
 
-  - name: Import hashicorp repo gpg key
+  - name: Verify | Import hashicorp repo gpg key
     ansible.builtin.rpm_key:
       state: present
       key: https://rpm.releases.hashicorp.com/gpg
 
-  - name: Add hashicorp repo
+  - name: Verify | Add hashicorp repo
     ansible.builtin.yum_repository:
       name: hashicorp
       description: Hashicorp Stable - $basearch

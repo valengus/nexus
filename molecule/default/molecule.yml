@@ -33,6 +33,11 @@ provisioner:
         nexus_admin_password: "password"
         nexus_bind_port: 8081
         nexus_api_url: "http://localhost:{{nexus_bind_port}}/service/rest"
+        nexus_default_properties:
+        - { option: application-port,              value: "{{ nexus_bind_port }}" }
+        - { option: nexus.skipDefaultRepositories, value: "true" }
+        nexus_properties:
+        - { option: application-port, value: "{{ nexus_bind_port }}" }
         nexus_yum_proxy_repos:
         - name: oraclelinux-proxy
           url: http://yum.oracle.com/repo/OracleLinux

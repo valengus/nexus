@@ -1,42 +1,66 @@
 ---
-- name: Check if nexus.properties exists
+- name: Nexus | Check if nexus.properties exists
   stat:
     path: /opt/sonatype-work/nexus3/etc/nexus.properties
   register: stat_result
 
-- name: Nexus | Nexus application-port
-  community.general.ini_file:
-    path: /opt/sonatype-work/nexus3/etc/nexus.properties
-    option: application-port
-    value: "{{ nexus_bind_port }}"
-    state: present
-    no_extra_spaces: true
-    owner: nexus
-    group: nexus
-  when: stat_result.stat.exists
-  notify: 
-    - Nexus restart
-
-- name: Nexus | Skip creating default repositories
+- name: Nexus | Nexus default properties (first startup)
   community.general.ini_file:
     path: /opt/nexus/etc/nexus-default.properties
     option: nexus.skipDefaultRepositories
-    value: "true"
-    state: present
+    option: "{{ item.option }}"
+    value: "{{ item.value }}"
     no_extra_spaces: true
     owner: nexus
     group: nexus
-  notify: 
-    - Nexus restart
+  when: not stat_result.stat.exists
+  with_items: "{{ nexus_default_properties }}"
 
-- name: Nexus | Nexus application-port (default.properties)
+- name: Nexus | Flush handlers
+  ansible.builtin.meta: flush_handlers
+
+- name: Nexus | Ensure service is enabled & started
+  ansible.builtin.service:
+    name: nexus
+    state: started
+    enabled: true
+
+- name: Nexus | Check Nexus status
+  ansible.builtin.uri:
+    url: "{{ nexus_api_url }}/v1/status"
+    user: admin
+    password: "{{ nexus_admin_password }}"
+    method: GET
+    force_basic_auth: true
+  register: _result
+  until: _result.status == 200
+  retries: 60
+  delay: 5
+
+- name: Nexus | Nexus properties
   community.general.ini_file:
-    path: /opt/nexus/etc/nexus-default.properties
-    option: application-port
-    value: "{{ nexus_bind_port }}"
+    path: /opt/sonatype-work/nexus3/etc/nexus.properties
+    option: "{{ item.option }}"
+    value: "{{ item.value }}"
     state: present
     no_extra_spaces: true
     owner: nexus
     group: nexus
+  with_items: "{{ nexus_properties }}"
   notify: 
-    - Nexus restart
+  - Nexus restart
+
+- name: Nexus | Flush handlers
+  ansible.builtin.meta: flush_handlers
+
+- name: Nexus | Check Nexus status
+  ansible.builtin.uri:
+    url: "{{ nexus_api_url }}/v1/status"
+    user: admin
+    password: "{{ nexus_admin_password }}"
+    method: GET
+    force_basic_auth: true
+  register: _result
+  until: _result.status == 200
+  retries: 60
+  delay: 5

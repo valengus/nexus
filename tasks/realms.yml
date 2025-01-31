@@ -1,0 +1,21 @@
+---
+- name: Nexus | Get active realms
+  ansible.builtin.uri:
+    url: "{{ nexus_api_url }}/v1/security/realms/active"
+    user: admin
+    password: "{{ nexus_admin_password }}"
+    method: GET
+    force_basic_auth: true
+  register: active_realms
+
+- name: Nexus | PUT DockerToken realm in active realm list
+  ansible.builtin.uri:
+    url: "{{ nexus_api_url }}/v1/security/realms/active"
+    user: admin
+    password: "{{ nexus_admin_password }}"
+    method: PUT
+    force_basic_auth: true
+    body_format: json
+    body: "{{ active_realms.json + ['DockerToken'] }}"
+    status_code: 204
+  when: active_realms.json is not contains('DockerToken')

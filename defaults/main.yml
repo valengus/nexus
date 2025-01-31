@@ -4,6 +4,12 @@ nexus_major_version: "{{ nexus_version.split('.')[0] }}"
 nexus_admin_password: "password"
 nexus_bind_port: 8081
 nexus_api_url: "http://localhost:{{nexus_bind_port}}/service/rest"
+nexus_default_properties:
+- { option: application-port,              value: "{{ nexus_bind_port }}" }
+- { option: nexus.skipDefaultRepositories, value: "true" }
+nexus_properties:
+- { option: application-port, value: "{{ nexus_bind_port }}" }
+- { option: application-host, value: "0.0.0.0" }
 
 nexus_yum_proxy_repos:
 - name: oraclelinux-proxy
