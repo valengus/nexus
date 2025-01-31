@@ -2,8 +2,13 @@
 - name: Verify
   hosts: all
   gather_facts: false
+  
   tasks:
   
+  - name: Verify | Install skopeo
+    ansible.builtin.yum:
+      name: skopeo
+
   - name: Verify | Check Nexus api 
     ansible.builtin.uri:
       url: "{{ nexus_api_url }}/v1/status"
@@ -11,3 +16,7 @@
       password: "{{ nexus_admin_password }}"
       method: GET
       force_basic_auth: true
+
+  - name: Verify | Check docker registry (download images)
+    ansible.builtin.shell: skopeo copy --src-tls-verify=false docker://localhost:5000/{{item}} docker-archive:/tmp/{{item}}.tar
+    with_items: ["ubuntu", "debian", "alpine"]

@@ -43,7 +43,7 @@ provisioner:
         nexus_docker_groups:
         - name: "docker-proxy-all"
           members: "{{ nexus_docker_proxy_repos | map(attribute='name') | list | unique }}"
-          http_port: 8080
+          http_port: 5000
 
 verifier:
   name: ansible
