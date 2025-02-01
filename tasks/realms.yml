@@ -1,4 +1,18 @@
 ---
+- name: Nexus | Anonymous Access
+  ansible.builtin.uri:
+    url: "{{ nexus_api_url }}/v1/security/anonymous"
+    user: admin
+    password: "{{ nexus_admin_password }}"
+    method: PUT
+    force_basic_auth: true
+    body_format: json
+    body:
+      enabled: "{{ nexus_anonymous_access }}"
+      userId: anonymous
+      realmName: NexusAuthorizingRealm
+    status_code: 200
+
 - name: Nexus | Get active realms
   ansible.builtin.uri:
     url: "{{ nexus_api_url }}/v1/security/realms/active"

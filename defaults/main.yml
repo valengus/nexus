@@ -11,6 +11,8 @@ nexus_properties:
 - { option: application-port, value: "{{ nexus_bind_port }}" }
 - { option: application-host, value: "0.0.0.0" }
 
+nexus_anonymous_access: "true"
+
 nexus_yum_proxy_repositories:
 - name: oraclelinux-proxy
   url: http://yum.oracle.com/repo/OracleLinux
