@@ -46,13 +46,3 @@ This Ansible role installs and configures Sonatype Nexus Repository Manager 3.
         url: https://stable.release.flatcar-linux.net
 
 ```
-
-## Test
-```bash
-python3 -m venv .venv
-source .venv/bin/activate
-pip install pip --upgrade
-pip install -r requirements.txt
-
-molecule test --all
-```
